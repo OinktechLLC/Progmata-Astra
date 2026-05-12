@@ -1,0 +1,28 @@
+{
+  "name": "ASTRA — Девочка и Земля",
+  "version": "1.0.0",
+  "description": "3D приключение в стиле PRAGMATA. Маленькая девочка Астра исследует постапокалиптическую Землю, собирает артефакты и активирует маяки проекта CRADLE. Система Battle Pass, сюжетные главы, псевдо-3D движок на Canvas.",
+  "genre": ["Adventure", "Action", "Story-Rich"],
+  "tags": ["3D", "sci-fi", "story", "battlepass", "exploration"],
+  "platform": "web",
+  "engine": "HTML5 Canvas",
+  "controls": {
+    "keyboard": "WASD / Arrow Keys to move, E to interact, ESC to pause, M for map",
+    "mobile": "D-Pad on screen + action buttons"
+  },
+  "features": [
+    "Pseudo-3D raycasting engine",
+    "4-chapter storyline with dialog system",
+    "Battle Pass with 10 levels (Free + Premium)",
+    "World map with 7 locations",
+    "Collectibles and exploration",
+    "XP and leveling system",
+    "Particle effects",
+    "Mobile touch controls",
+    "Atmospheric audio ambience"
+  ],
+  "season": "Season 1 — Пробуждение",
+  "platform_link": "https://onegames.base44.app",
+  "author": "OneGames Platform",
+  "license": "OneGames"
+}

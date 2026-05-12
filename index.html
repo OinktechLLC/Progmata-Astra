@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRA — Девочка и Земля | OneGames</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --cyan: #00d4ff;
+    --gold: #ffd700;
+    --blue: #1a3a6e;
+    --dark: #050a14;
+    --panel: rgba(0,20,50,0.85);
+    --border: rgba(0,212,255,0.3);
+  }
+
+  body {
+    background: var(--dark);
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { position: fixed; inset: 0; display: none; z-index: 10; }
+  .screen.active { display: flex; }
+
+  /* ===== MAIN MENU ===== */
+  #menuScreen {
+    background: radial-gradient(ellipse at 30% 50%, #0a1a3a 0%, #050a14 60%),
+                linear-gradient(180deg, transparent 60%, #000510 100%);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(0,212,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 80%, rgba(0,212,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.7) 0%, transparent 100%);
+    background-size: 400px 400px, 300px 300px, 500px 500px, 350px 350px, 450px 450px;
+    animation: starsDrift 20s linear infinite;
+  }
+
+  @keyframes starsDrift {
+    0% { transform: translate(0,0); }
+    100% { transform: translate(-50px, -30px); }
+  }
+
+  .scanline {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.02) 2px, rgba(0,212,255,0.02) 4px);
+    pointer-events: none;
+    animation: scanMove 8s linear infinite;
+  }
+
+  @keyframes scanMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100%; }
+  }
+
+  .menu-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .game-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: #fff;
+    text-shadow: 0 0 40px var(--cyan), 0 0 80px rgba(0,212,255,0.3);
+    animation: logoPulse 3s ease-in-out infinite;
+    margin-bottom: -5px;
+  }
+
+  @keyframes logoPulse {
+    0%,100% { text-shadow: 0 0 40px var(--cyan), 0 0 80px rgba(0,212,255,0.3); }
+    50% { text-shadow: 0 0 60px var(--cyan), 0 0 120px rgba(0,212,255,0.5), 0 0 180px rgba(0,212,255,0.2); }
+  }
+
+  .game-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(14px, 2vw, 22px);
+    letter-spacing: 0.5em;
+    color: var(--cyan);
+    opacity: 0.7;
+    margin-bottom: 60px;
+    text-transform: uppercase;
+  }
+
+  .hero-figure {
+    width: 220px;
+    height: 300px;
+    position: relative;
+    margin-bottom: 40px;
+    animation: heroFloat 4s ease-in-out infinite;
+  }
+
+  @keyframes heroFloat {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .hero-figure svg { width: 100%; height: 100%; filter: drop-shadow(0 0 20px rgba(0,212,255,0.4)); }
+
+  .menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .menu-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    padding: 14px 60px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: #fff;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    position: relative;
+    overflow: hidden;
+    min-width: 280px;
+  }
+
+  .menu-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .menu-btn:hover { border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+  .menu-btn:hover::before { transform: translateX(100%); }
+  .menu-btn.primary { border-color: var(--cyan); background: rgba(0,212,255,0.15); }
+  .menu-btn.gold { border-color: var(--gold); color: var(--gold); background: rgba(255,215,0,0.1); }
+  .menu-btn.gold:hover { text-shadow: 0 0 10px var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+
+  .platform-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--cyan);
+    opacity: 0.6;
+    letter-spacing: 0.2em;
+  }
+
+  /* ===== STORY SCREEN ===== */
+  #storyScreen {
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .story-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(16px, 2.5vw, 24px);
+    line-height: 1.8;
+    color: rgba(255,255,255,0.9);
+    max-width: 700px;
+    padding: 40px;
+    opacity: 0;
+    animation: fadeIn 2s forwards 0.5s;
+  }
+
+  .story-chapter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5em;
+    color: var(--cyan);
+    margin-bottom: 30px;
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+  }
+
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  .story-continue-btn {
+    margin-top: 40px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    padding: 12px 40px;
+    border: 1px solid var(--cyan);
+    background: transparent;
+    color: var(--cyan);
+    cursor: pointer;
+    animation: blink 2s ease-in-out infinite 3s;
+    opacity: 0;
+    animation: fadeIn 1s forwards 3s, blink 2s ease-in-out infinite 4s;
+  }
+
+  @keyframes blink {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ===== BATTLE PASS SCREEN ===== */
+  #battlepassScreen {
+    background: linear-gradient(135deg, #050a14, #0a1525);
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .bp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    margin-bottom: 30px;
+    flex-shrink: 0;
+  }
+
+  .bp-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,215,0,0.4);
+  }
+
+  .bp-season {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    color: var(--cyan);
+    letter-spacing: 0.3em;
+  }
+
+  .bp-xp-bar {
+    background: rgba(255,255,255,0.1);
+    height: 8px;
+    border-radius: 4px;
+    margin: 20px 30px;
+    overflow: hidden;
+  }
+
+  .bp-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--gold));
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  .bp-tracks {
+    display: flex;
+    gap: 20px;
+    padding: 0 20px;
+    overflow-x: auto;
+    min-height: 300px;
+  }
+
+  .bp-track {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 100px;
+    align-items: center;
+  }
+
+  .bp-level-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.2em;
+  }
+
+  .bp-reward {
+    width: 90px;
+    height: 110px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+  }
+
+  .bp-reward:hover { border-color: var(--cyan); transform: scale(1.05); }
+  .bp-reward.unlocked { border-color: var(--cyan); background: rgba(0,212,255,0.1); }
+  .bp-reward.premium { border-color: var(--gold); }
+  .bp-reward.premium.unlocked { background: rgba(255,215,0,0.1); }
+  .bp-reward.locked { opacity: 0.5; }
+
+  .bp-reward-icon { font-size: 30px; }
+
+  .bp-reward-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    line-height: 1.2;
+    padding: 0 5px;
+  }
+
+  .bp-tag-free {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 8px;
+    background: rgba(0,212,255,0.3);
+    color: var(--cyan);
+    padding: 1px 4px;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .bp-tag-premium {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 8px;
+    background: rgba(255,215,0,0.3);
+    color: var(--gold);
+    padding: 1px 4px;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .bp-section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.5);
+    padding: 0 30px;
+    margin: 10px 0;
+  }
+
+  .bp-buy-btn {
+    margin: 20px auto;
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    padding: 16px 50px;
+    border: 1px solid var(--gold);
+    background: rgba(255,215,0,0.15);
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.3s;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+  }
+
+  .bp-buy-btn:hover { background: rgba(255,215,0,0.3); box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+
+  /* ===== GAME CANVAS ===== */
+  #gameScreen {
+    background: #000;
+    flex-direction: column;
+  }
+
+  #gameCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ===== HUD ===== */
+  #hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .hud-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px 20px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+  }
+
+  .hud-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 10px 15px;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .hud-chapter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+  }
+
+  .hud-objective {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    color: #fff;
+    margin-top: 4px;
+  }
+
+  .hud-stats {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .hud-health {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+  }
+
+  .hud-health-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 0.2em;
+  }
+
+  .hud-health-bar {
+    width: 120px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--border);
+  }
+
+  .hud-health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00d4ff);
+    transition: width 0.3s;
+  }
+
+  .hud-xp {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+  }
+
+  .hud-xp-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+  }
+
+  .hud-xp-bar {
+    width: 120px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,215,0,0.3);
+  }
+
+  .hud-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #ffaa00);
+    transition: width 0.5s;
+  }
+
+  .hud-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 15px 20px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.6), transparent);
+  }
+
+  .hud-controls {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+  }
+
+  .hud-controls span {
+    color: var(--cyan);
+    font-weight: 600;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+  }
+
+  .hud-compass {
+    width: 60px;
+    height: 60px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+
+  /* ===== NOTIFICATION ===== */
+  #notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 1px solid var(--cyan);
+    padding: 15px 30px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    z-index: 100;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    text-align: center;
+    max-width: 90vw;
+  }
+
+  #notification.show { opacity: 1; }
+
+  /* ===== PAUSE MENU ===== */
+  #pauseMenu {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    z-index: 50;
+  }
+
+  #pauseMenu.show { display: flex; }
+
+  .pause-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px var(--cyan);
+  }
+
+  /* ===== DIALOG BOX ===== */
+  #dialog {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(700px, 90vw);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px 25px;
+    z-index: 20;
+    display: none;
+    clip-path: polygon(15px 0%, 100% 0%, calc(100% - 15px) 100%, 0% 100%);
+  }
+
+  #dialog.show { display: block; }
+
+  .dialog-speaker {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    color: var(--cyan);
+    letter-spacing: 0.3em;
+    margin-bottom: 8px;
+  }
+
+  .dialog-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    color: #fff;
+    line-height: 1.5;
+  }
+
+  .dialog-prompt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.3em;
+    margin-top: 12px;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  /* ===== MAP SCREEN ===== */
+  #mapScreen {
+    background: #050a14;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .map-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.4em;
+    color: var(--cyan);
+    position: absolute;
+    top: 30px;
+  }
+
+  .world-map {
+    width: min(800px, 90vw);
+    height: min(500px, 70vh);
+    position: relative;
+    border: 1px solid var(--border);
+    background: rgba(0,20,50,0.5);
+  }
+
+  .map-location {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .map-location:hover .map-dot { transform: scale(1.5); box-shadow: 0 0 20px var(--cyan); }
+
+  .map-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--cyan);
+    border: 2px solid #fff;
+    transition: all 0.3s;
+    animation: mapPulse 2s ease-in-out infinite;
+  }
+
+  .map-dot.locked { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); animation: none; }
+  .map-dot.completed { background: var(--gold); }
+
+  @keyframes mapPulse {
+    0%,100% { box-shadow: 0 0 5px var(--cyan); }
+    50% { box-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(0,212,255,0.3); }
+  }
+
+  .map-location-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: #fff;
+    letter-spacing: 0.1em;
+    margin-top: 5px;
+    white-space: nowrap;
+  }
+
+  .map-location-chapter {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ===== MOBILE CONTROLS ===== */
+  #mobileControls {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: none;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 15;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px), (pointer: coarse) {
+    #mobileControls { display: flex; }
+  }
+
+  .dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(3, 50px);
+    gap: 3px;
+    pointer-events: auto;
+  }
+
+  .dpad-btn {
+    background: rgba(0,212,255,0.15);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+    active: { background: rgba(0,212,255,0.4); }
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+  }
+
+  .dpad-btn:active { background: rgba(0,212,255,0.4); }
+  .dpad-center { background: transparent; border: none; }
+
+  .action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    pointer-events: auto;
+  }
+
+  .action-btn {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.15);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+  }
+
+  .action-btn:active { background: rgba(0,212,255,0.4); }
+
+  /* ===== BACK BTN ===== */
+  .back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 20;
+    pointer-events: auto;
+  }
+
+  .back-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ===== LEVEL UP ===== */
+  #levelUp {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+    animation: levelFadeIn 0.5s ease;
+  }
+
+  @keyframes levelFadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  #levelUp.show { display: flex; }
+
+  .level-up-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-shadow: 0 0 40px var(--gold), 0 0 80px rgba(255,215,0,0.5);
+    animation: levelPulse 0.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes levelPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+  }
+
+  .level-up-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: 0.3em;
+    margin-top: 10px;
+  }
+
+  .level-up-reward {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    color: var(--cyan);
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATION -->
+<div id="notification">Новый квест получен!</div>
+
+<!-- LEVEL UP -->
+<div id="levelUp">
+  <div class="level-up-text">УРОВЕНЬ ПОВЫШЕН</div>
+  <div class="level-up-sub" id="levelUpNum">УРОВЕНЬ 2</div>
+  <div class="level-up-reward" id="levelUpReward">+50 Очков Battle Pass</div>
+</div>
+
+<!-- ============ MAIN MENU ============ -->
+<div id="menuScreen" class="screen active">
+  <div class="stars"></div>
+  <div class="scanline"></div>
+  <div class="platform-badge">ONEGAMES PLATFORM</div>
+  <div class="menu-content">
+    <div class="game-logo">ASTRA</div>
+    <div class="game-subtitle">Девочка и Земля</div>
+    <div class="hero-figure">
+      <svg viewBox="0 0 220 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- Glow -->
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="80%" r="50%">
+            <stop offset="0%" stop-color="rgba(0,212,255,0.3)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <filter id="blur"><feGaussianBlur stdDeviation="3"/></filter>
+        </defs>
+        <ellipse cx="110" cy="280" rx="70" ry="15" fill="url(#glow)" filter="url(#blur)"/>
+        <!-- Body - blue jacket -->
+        <rect x="75" y="140" width="70" height="90" rx="12" fill="#1a5acc"/>
+        <rect x="75" y="140" width="70" height="40" rx="8" fill="#2266ee"/>
+        <!-- Arms -->
+        <rect x="48" y="148" width="30" height="18" rx="8" fill="#2266ee" transform="rotate(-10 48 148)"/>
+        <rect x="142" y="148" width="30" height="18" rx="8" fill="#2266ee" transform="rotate(10 172 148)"/>
+        <!-- Jacket details -->
+        <line x1="110" y1="145" x2="110" y2="225" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        <circle cx="110" cy="175" r="4" fill="rgba(255,255,255,0.3)"/>
+        <circle cx="110" cy="195" r="4" fill="rgba(255,255,255,0.3)"/>
+        <!-- Neck -->
+        <rect x="100" y="125" width="20" height="20" rx="5" fill="#f4c896"/>
+        <!-- Head -->
+        <ellipse cx="110" cy="108" rx="32" ry="30" fill="#f4c896"/>
+        <!-- Hair - long blonde -->
+        <ellipse cx="110" cy="90" rx="34" ry="20" fill="#d4a030"/>
+        <rect x="78" y="95" width="16" height="70" rx="8" fill="#d4a030"/>
+        <rect x="126" y="95" width="16" height="70" rx="8" fill="#d4a030"/>
+        <rect x="82" y="80" width="56" height="30" rx="15" fill="#e0b040"/>
+        <!-- Face -->
+        <ellipse cx="97" cy="112" rx="4" ry="5" fill="#2a1a0a"/>
+        <ellipse cx="123" cy="112" rx="4" ry="5" fill="#2a1a0a"/>
+        <!-- Eye highlights -->
+        <circle cx="99" cy="110" r="1.5" fill="#fff"/>
+        <circle cx="125" cy="110" r="1.5" fill="#fff"/>
+        <!-- Smile -->
+        <path d="M 100 122 Q 110 130 120 122" stroke="#c47050" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Cheeks -->
+        <ellipse cx="92" cy="120" rx="6" ry="4" fill="rgba(255,150,100,0.3)"/>
+        <ellipse cx="128" cy="120" rx="6" ry="4" fill="rgba(255,150,100,0.3)"/>
+        <!-- Legs -->
+        <rect x="83" y="225" width="22" height="55" rx="8" fill="#1a1a3a"/>
+        <rect x="115" y="225" width="22" height="55" rx="8" fill="#1a1a3a"/>
+        <!-- Boots -->
+        <rect x="80" y="268" width="28" height="18" rx="5" fill="#333"/>
+        <rect x="112" y="268" width="28" height="18" rx="5" fill="#333"/>
+        <!-- Holographic device on wrist -->
+        <rect x="50" y="160" width="12" height="8" rx="2" fill="#00d4ff" opacity="0.8"/>
+        <rect x="51" y="161" width="10" height="6" rx="1" fill="rgba(0,212,255,0.4)"/>
+        <!-- Scan lines on device -->
+        <line x1="52" y1="163" x2="59" y2="163" stroke="#fff" stroke-width="0.5" opacity="0.8"/>
+        <line x1="52" y1="165" x2="57" y2="165" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
+        <!-- Particle effects -->
+        <circle cx="155" cy="150" r="2" fill="#00d4ff" opacity="0.7">
+          <animate attributeName="cy" values="150;130;150" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.7;0;0.7" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="65" cy="170" r="1.5" fill="#00d4ff" opacity="0.5">
+          <animate attributeName="cy" values="170;145;170" dur="2.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="145" cy="200" r="1" fill="#ffd700" opacity="0.8">
+          <animate attributeName="cy" values="200;175;200" dur="4s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <div class="menu-buttons">
+      <button class="menu-btn primary" onclick="startStory()">▶ НАЧАТЬ ИГРУ</button>
+      <button class="menu-btn" onclick="showMap()">🗺 КАРТА МИРА</button>
+      <button class="menu-btn gold" onclick="showBattlepass()">⚡ BATTLE PASS</button>
+      <button class="menu-btn" onclick="showCredits()">ℹ ONEGAMES</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STORY SCREEN ============ -->
+<div id="storyScreen" class="screen">
+  <button class="back-btn" onclick="showMenu()">← МЕНЮ</button>
+  <div class="story-chapter" id="storyChapter">— ГЛАВА 1 —</div>
+  <div class="story-text" id="storyText"></div>
+  <button class="story-continue-btn" id="storyContinueBtn" onclick="continueStory()">[ НАЖМИТЕ ЧТОБЫ ПРОДОЛЖИТЬ ]</button>
+</div>
+
+<!-- ============ MAP SCREEN ============ -->
+<div id="mapScreen" class="screen">
+  <button class="back-btn" onclick="showMenu()">← МЕНЮ</button>
+  <div class="map-title">КАРТА МИРА</div>
+  <div class="world-map" id="worldMap">
+    <!-- Map locations will be rendered here -->
+  </div>
+</div>
+
+<!-- ============ BATTLEPASS SCREEN ============ -->
+<div id="battlepassScreen" class="screen">
+  <button class="back-btn" onclick="showMenu()">← МЕНЮ</button>
+  <div class="bp-header">
+    <div>
+      <div class="bp-season">СЕЗОН 1 — ПРОБУЖДЕНИЕ</div>
+      <div class="bp-title">⚡ BATTLE PASS</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(255,255,255,0.5);">УРОВЕНЬ</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:32px;color:var(--gold)" id="bpLevelDisplay">1</div>
+    </div>
+  </div>
+  <div class="bp-section-title">Прогресс XP</div>
+  <div class="bp-xp-bar">
+    <div class="bp-xp-fill" id="bpXpFill" style="width:10%"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;padding:5px 30px;font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(255,255,255,0.4)">
+    <span id="bpXpText">10 / 100 XP</span>
+    <span>СЛЕДУЮЩИЙ УРОВЕНЬ</span>
+  </div>
+  <div class="bp-section-title" style="margin-top:20px">— БЕСПЛАТНЫЕ НАГРАДЫ — / — PREMIUM PASS —</div>
+  <div class="bp-tracks" id="bpTracks"></div>
+  <button class="bp-buy-btn" onclick="buyBattlepass()">⚡ КУПИТЬ PREMIUM PASS — 950 ⭐</button>
+  <div style="text-align:center;font-family:'Rajdhani',sans-serif;font-size:13px;color:rgba(255,255,255,0.3);padding:10px;padding-bottom:40px">
+    Powered by <span style="color:var(--cyan)">OneGames Platform</span> | onegames.base44.app
+  </div>
+</div>
+
+<!-- ============ GAME SCREEN ============ -->
+<div id="gameScreen" class="screen">
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-top">
+      <div class="hud-panel">
+        <div class="hud-chapter" id="hudChapter">ГЛАВА 1 — ПРОБУЖДЕНИЕ</div>
+        <div class="hud-objective" id="hudObjective">Исследуй заброшенный город</div>
+      </div>
+      <div class="hud-stats">
+        <div class="hud-health">
+          <div class="hud-health-label">ЗДОРОВЬЕ</div>
+          <div class="hud-health-bar">
+            <div class="hud-health-fill" id="healthFill" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="hud-xp">
+          <div class="hud-xp-label">XP <span id="hudXp">10</span></div>
+          <div class="hud-xp-bar">
+            <div class="hud-xp-fill" id="xpFill" style="width:10%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hud-bottom">
+      <div class="hud-controls">
+        <span>WASD</span> / Стрелки — движение<br>
+        <span>E</span> — взаимодействие<br>
+        <span>ESC</span> — пауза<br>
+        <span>M</span> — карта
+      </div>
+      <div class="hud-compass" id="hudCompass">N</div>
+    </div>
+  </div>
+
+  <!-- Dialog -->
+  <div id="dialog">
+    <div class="dialog-speaker" id="dialogSpeaker">АСТРА</div>
+    <div class="dialog-text" id="dialogText"></div>
+    <div class="dialog-prompt">[ E — продолжить ]</div>
+  </div>
+
+  <!-- Mobile Controls -->
+  <div id="mobileControls">
+    <div class="dpad">
+      <div></div>
+      <div class="dpad-btn" id="btnUp" ontouchstart="keys.up=true" ontouchend="keys.up=false">▲</div>
+      <div></div>
+      <div class="dpad-btn" id="btnLeft" ontouchstart="keys.left=true" ontouchend="keys.left=false">◄</div>
+      <div class="dpad-center"></div>
+      <div class="dpad-btn" id="btnRight" ontouchstart="keys.right=true" ontouchend="keys.right=false">►</div>
+      <div></div>
+      <div class="dpad-btn" id="btnDown" ontouchstart="keys.down=true" ontouchend="keys.down=false">▼</div>
+      <div></div>
+    </div>
+    <div class="action-btns">
+      <div class="action-btn" ontouchstart="handleInteract()">E</div>
+      <div class="action-btn" onclick="togglePause()">⏸</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAUSE MENU ============ -->
+<div id="pauseMenu">
+  <div class="pause-title">ПАУЗА</div>
+  <button class="menu-btn" onclick="togglePause()">▶ ПРОДОЛЖИТЬ</button>
+  <button class="menu-btn" onclick="showBattlepass()">⚡ BATTLE PASS</button>
+  <button class="menu-btn" onclick="showMenu()">← ГЛАВНОЕ МЕНЮ</button>
+</div>
+
+<script src="js/game.js"></script>
+</body>
+</html>
