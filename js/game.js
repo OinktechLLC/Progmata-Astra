@@ -561,6 +561,9 @@ function update(dt) {
       player.animFrame = (player.animFrame + 1) % 4;
       player.animTimer = 0;
     }
+  } else {
+    player.bobPhase = 0;
+    player.animFrame = 0;
   }
 
   camera.x = player.x;
@@ -726,6 +729,9 @@ function render() {
     .sort((a, b) => b.dist - a.dist);
 
   objsToRender.forEach(obj => renderObject(obj, W, H));
+
+  // Render player character (Astra - third person view from behind)
+  renderPlayer(W, H);
 
   // Render particles
   particles.forEach(p => {
@@ -998,6 +1004,239 @@ function shadeColor(hex, brightness) {
   const g = parseInt(hex.slice(3,5), 16);
   const b = parseInt(hex.slice(5,7), 16);
   return `rgba(${Math.floor(r*brightness)},${Math.floor(g*brightness)},${Math.floor(b*brightness)},1)`;
+}
+
+// ===== RENDER PLAYER (ASTRA) =====
+function renderPlayer(W, H) {
+  // Third-person view: Astra is rendered at bottom center of screen
+  const playerX = W / 2;
+  const playerY = H * 0.85;
+  const playerScale = Math.min(W, H) * 0.0025;
+  
+  // Bobbing animation when moving
+  const bobOffset = Math.sin(player.bobPhase) * 3;
+  
+  // Leg animation based on movement
+  const legSwing = player.animFrame * 0.3;
+  
+  // Body shadow/glow
+  const bodyGlow = ctx.createRadialGradient(playerX, playerY - 60 * playerScale, 0, playerX, playerY - 60 * playerScale, 80 * playerScale);
+  bodyGlow.addColorStop(0, 'rgba(0,212,255,0.15)');
+  bodyGlow.addColorStop(1, 'transparent');
+  ctx.fillStyle = bodyGlow;
+  ctx.beginPath();
+  ctx.arc(playerX, playerY - 60 * playerScale, 80 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Legs (animated)
+  const legWidth = 14 * playerScale;
+  const legHeight = 50 * playerScale;
+  const legGap = 18 * playerScale;
+  
+  // Left leg
+  ctx.fillStyle = '#1a1a3a';
+  ctx.save();
+  ctx.translate(playerX - legGap/2, playerY - 20 * playerScale);
+  ctx.rotate(Math.sin(legSwing) * 0.3);
+  ctx.fillRect(-legWidth/2, -legHeight, legWidth, legHeight);
+  ctx.restore();
+  
+  // Right leg
+  ctx.save();
+  ctx.translate(playerX + legGap/2, playerY - 20 * playerScale);
+  ctx.rotate(Math.sin(legSwing + Math.PI) * 0.3);
+  ctx.fillRect(-legWidth/2, -legHeight, legWidth, legHeight);
+  ctx.restore();
+  
+  // Boots
+  ctx.fillStyle = '#333';
+  ctx.beginPath();
+  ctx.roundRect(playerX - legGap/2 - legWidth/2 - 2*playerScale, playerY - 22 * playerScale, legWidth + 4*playerScale, 14 * playerScale, 3*playerScale);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect(playerX + legGap/2 - legWidth/2 - 2*playerScale, playerY - 22 * playerScale, legWidth + 4*playerScale, 14 * playerScale, 3*playerScale);
+  ctx.fill();
+  
+  // Body (blue jacket with hood)
+  const bodyWidth = 50 * playerScale;
+  const bodyHeight = 70 * playerScale;
+  
+  // Jacket gradient
+  const jacketGrad = ctx.createLinearGradient(playerX - bodyWidth/2, playerY - 90 * playerScale, playerX + bodyWidth/2, playerY - 20 * playerScale);
+  jacketGrad.addColorStop(0, '#2266ee');
+  jacketGrad.addColorStop(1, '#1a5acc');
+  ctx.fillStyle = jacketGrad;
+  
+  // Main body shape
+  ctx.beginPath();
+  ctx.roundRect(playerX - bodyWidth/2, playerY - 90 * playerScale - bobOffset, bodyWidth, bodyHeight, 10 * playerScale);
+  ctx.fill();
+  
+  // Jacket details - zipper
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 2 * playerScale;
+  ctx.beginPath();
+  ctx.moveTo(playerX, playerY - 85 * playerScale - bobOffset);
+  ctx.lineTo(playerX, playerY - 35 * playerScale - bobOffset);
+  ctx.stroke();
+  
+  // Jacket buttons
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.beginPath();
+  ctx.arc(playerX, playerY - 65 * playerScale - bobOffset, 3 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(playerX, playerY - 50 * playerScale - bobOffset, 3 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Arms (slight swing animation)
+  const armWidth = 12 * playerScale;
+  const armLength = 45 * playerScale;
+  const armAngle = Math.sin(legSwing) * 0.2;
+  
+  // Left arm
+  ctx.fillStyle = '#2266ee';
+  ctx.save();
+  ctx.translate(playerX - bodyWidth/2 - armWidth/2, playerY - 85 * playerScale - bobOffset);
+  ctx.rotate(armAngle - 0.1);
+  ctx.beginPath();
+  ctx.roundRect(-armWidth/2, 0, armWidth, armLength, 6 * playerScale);
+  ctx.fill();
+  ctx.restore();
+  
+  // Right arm
+  ctx.save();
+  ctx.translate(playerX + bodyWidth/2 + armWidth/2, playerY - 85 * playerScale - bobOffset);
+  ctx.rotate(-armAngle + 0.1);
+  ctx.beginPath();
+  ctx.roundRect(-armWidth/2, 0, armWidth, armLength, 6 * playerScale);
+  ctx.fill();
+  ctx.restore();
+  
+  // Holographic wrist device (left hand)
+  ctx.fillStyle = '#00d4ff';
+  ctx.beginPath();
+  ctx.roundRect(playerX - bodyWidth/2 - armWidth/2 - 3*playerScale, playerY - 55 * playerScale - bobOffset + armAngle * 20 * playerScale, 8 * playerScale, 6 * playerScale, 2 * playerScale);
+  ctx.fill();
+  
+  // Device glow
+  const deviceGlow = ctx.createRadialGradient(
+    playerX - bodyWidth/2 - armWidth/2, 
+    playerY - 52 * playerScale - bobOffset + armAngle * 20 * playerScale, 
+    0,
+    playerX - bodyWidth/2 - armWidth/2, 
+    playerY - 52 * playerScale - bobOffset + armAngle * 20 * playerScale, 
+    15 * playerScale
+  );
+  deviceGlow.addColorStop(0, 'rgba(0,212,255,0.6)');
+  deviceGlow.addColorStop(1, 'transparent');
+  ctx.fillStyle = deviceGlow;
+  ctx.beginPath();
+  ctx.arc(playerX - bodyWidth/2 - armWidth/2, playerY - 52 * playerScale - bobOffset + armAngle * 20 * playerScale, 15 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Neck
+  ctx.fillStyle = '#f4c896';
+  ctx.beginPath();
+  ctx.roundRect(playerX - 10 * playerScale, playerY - 100 * playerScale - bobOffset, 20 * playerScale, 15 * playerScale, 5 * playerScale);
+  ctx.fill();
+  
+  // Head
+  const headRadius = 28 * playerScale;
+  ctx.fillStyle = '#f4c896';
+  ctx.beginPath();
+  ctx.arc(playerX, playerY - 110 * playerScale - bobOffset, headRadius, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Hair (long blonde, flowing)
+  const hairColor = '#d4a030';
+  const hairHighlight = '#e0b040';
+  
+  // Back hair (flowing down)
+  ctx.fillStyle = hairColor;
+  ctx.beginPath();
+  ctx.arc(playerX, playerY - 115 * playerScale - bobOffset, headRadius + 3 * playerScale, Math.PI, 0);
+  ctx.lineTo(playerX + headRadius + 5 * playerScale, playerY - 70 * playerScale - bobOffset);
+  ctx.lineTo(playerX - headRadius - 5 * playerScale, playerY - 70 * playerScale - bobOffset);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Side hair strands
+  ctx.beginPath();
+  ctx.roundRect(playerX - headRadius - 8 * playerScale, playerY - 115 * playerScale - bobOffset, 12 * playerScale, 60 * playerScale, 6 * playerScale);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect(playerX + headRadius - 4 * playerScale, playerY - 115 * playerScale - bobOffset, 12 * playerScale, 60 * playerScale, 6 * playerScale);
+  ctx.fill();
+  
+  // Top hair
+  ctx.fillStyle = hairHighlight;
+  ctx.beginPath();
+  ctx.ellipse(playerX, playerY - 120 * playerScale - bobOffset, headRadius + 2 * playerScale, headRadius * 0.6, 0, Math.PI, 0);
+  ctx.fill();
+  
+  // Face features
+  // Eyes
+  ctx.fillStyle = '#2a1a0a';
+  ctx.beginPath();
+  ctx.ellipse(playerX - 8 * playerScale, playerY - 110 * playerScale - bobOffset, 4 * playerScale, 5 * playerScale, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(playerX + 8 * playerScale, playerY - 110 * playerScale - bobOffset, 4 * playerScale, 5 * playerScale, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Eye highlights (sparkle)
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(playerX - 6 * playerScale, playerY - 112 * playerScale - bobOffset, 2 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(playerX + 10 * playerScale, playerY - 112 * playerScale - bobOffset, 2 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Smile
+  ctx.strokeStyle = '#c47050';
+  ctx.lineWidth = 2 * playerScale;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(playerX, playerY - 105 * playerScale - bobOffset, 8 * playerScale, 0.1 * Math.PI, 0.9 * Math.PI);
+  ctx.stroke();
+  
+  // Cheeks (rosy)
+  ctx.fillStyle = 'rgba(255,150,100,0.25)';
+  ctx.beginPath();
+  ctx.arc(playerX - 12 * playerScale, playerY - 107 * playerScale - bobOffset, 5 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(playerX + 12 * playerScale, playerY - 107 * playerScale - bobOffset, 5 * playerScale, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Hood outline (semi-transparent energy effect)
+  ctx.strokeStyle = 'rgba(0,212,255,0.2)';
+  ctx.lineWidth = 2 * playerScale;
+  ctx.beginPath();
+  ctx.arc(playerX, playerY - 115 * playerScale - bobOffset, headRadius + 8 * playerScale, Math.PI * 0.8, Math.PI * 2.2);
+  ctx.stroke();
+  
+  // Floating particles around Astra
+  const time = performance.now() / 1000;
+  for (let i = 0; i < 5; i++) {
+    const px = playerX + Math.sin(time * 2 + i * 1.5) * 40 * playerScale;
+    const py = playerY - 80 * playerScale - bobOffset + Math.cos(time * 3 + i * 2) * 30 * playerScale;
+    const pSize = (i % 3 + 1) * 1.5 * playerScale;
+    
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(0,212,255,0.6)' : 'rgba(255,215,0,0.5)';
+    ctx.beginPath();
+    ctx.arc(px, py, pSize, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Name tag above head
+  ctx.fillStyle = 'rgba(0,212,255,0.8)';
+  ctx.font = `bold ${12 * playerScale}px Orbitron`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('АСТРА', playerX, playerY - 155 * playerScale - bobOffset);
 }
 
 // ===== PARTICLES =====
